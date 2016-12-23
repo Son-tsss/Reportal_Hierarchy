@@ -1,3 +1,17 @@
+class Helper{
+    /**
+     * @memberof TAHelper
+     * @function GetSelfName
+     * @description function to trim out parents cateories from the category name
+     * @param {String} name
+     * @param {String} separator
+     * @returns {String}
+     */
+    static function GetSelfName(name, separator){
+    var index = name.lastIndexOf(separator);
+    return name.slice((index+1)).Trim();
+}
+}
 /**
  * @class Hierarchy
  * @classdesc Class to create Hierarchical structure from database table
@@ -20,7 +34,8 @@ class Hierarchy{
         textColumnName: "__l9",
         relationshipColumnName: "parent",
         textSeparator: "|",
-        additionalColumns: []
+        additionalColumns: [],
+        helper: Helper
     };
 
     function Hierarchy(globals, settings) {
@@ -93,7 +108,7 @@ class Hierarchy{
      * @returns {Object}
      */
     private function _createFlatEntry(row) {
-    var name = row[_settings.textColumnName];
+    var name = _settings.helper.GetSelfName(row[_settings.textColumnName], _settings.textSeparator, _globals.log);;
     var flatEntry = {
         id: row[_settings.idColumnName].toLowerCase(),
         text: row[_settings.textColumnName],
