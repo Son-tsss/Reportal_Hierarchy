@@ -26,7 +26,6 @@ class Hierarchy{
     function Hierarchy(globals, settings) {
     _globals = globals;
     _settings = _mergeOptions(_defaultSettings, settings);
-    globals.log.LogDebug(_settings.schemaId);
     var dataTable = _getDataTable();
     _generateFlatList(dataTable.Rows)
     _setupHierarchy(0, null);
