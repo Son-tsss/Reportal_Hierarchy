@@ -1,16 +1,3 @@
-class Helper{
-    /**
-     * @memberof TAHelper
-     * @function GetSelfName
-     * @description function to trim out parents cateories from the category name
-     * @param {String} name
-     * @param {String} separator
-     * @returns {String}
-     */
-    static function GetSelfName(name, separator){
-    return name
-}
-}
 /**
  * @class Hierarchy
  * @classdesc Class to create Hierarchical structure from database table
@@ -34,7 +21,6 @@ class Hierarchy{
         relationshipColumnName: "parent",
         textSeparator: "|",
         additionalColumns: [],
-        helper: Helper
     };
 
     function Hierarchy(globals, settings) {
