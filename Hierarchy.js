@@ -8,8 +8,7 @@ class Helper{
      * @returns {String}
      */
     static function GetSelfName(name, separator){
-    var index = name.lastIndexOf(separator);
-    return name.slice((index+1)).Trim();
+    return name
 }
 }
 /**
