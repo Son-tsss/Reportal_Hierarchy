@@ -107,7 +107,7 @@ class Hierarchy{
      * @returns {Object}
      */
     private function _createFlatEntry(row) {
-    var name = _settings.helper.GetSelfName(row[_settings.textColumnName], _settings.textSeparator, _globals.log);;
+    var name = _settings.helper.GetSelfName(row[_settings.textColumnName], _settings.textSeparator, _globals.log);
     var flatEntry = {
         id: row[_settings.idColumnName].toLowerCase(),
         text: row[_settings.textColumnName],
