@@ -99,6 +99,19 @@ class Hierarchy{
 
     /**
      * @memberof Hierarchy
+     * @function GetSelfName
+     * @description function to trim out parents cateories from the category name
+     * @param {String} name
+     * @param {String} separator
+     * @returns {String}
+     */
+    static function GetSelfName(name, separator){
+        var index = name.lastIndexOf(separator);
+        return name.slice((index+1)).Trim();
+    }
+
+    /**
+     * @memberof Hierarchy
      * @private
      * @instance
      * @function _createFlatEntry
@@ -107,7 +120,7 @@ class Hierarchy{
      * @returns {Object}
      */
     private function _createFlatEntry(row) {
-    var name = _settings.helper.GetSelfName(row[_settings.textColumnName], _settings.textSeparator, _globals.log);
+    var name = GetSelfName(row[_settings.textColumnName], _settings.textSeparator, _globals.log);
     var flatEntry = {
         id: row[_settings.idColumnName].toLowerCase(),
         text: row[_settings.textColumnName],
