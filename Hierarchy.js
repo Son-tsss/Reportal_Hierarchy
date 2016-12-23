@@ -15,7 +15,7 @@ class Hierarchy{
     private var _levels = [];
     private var _flat = [];
     private var _flatObject = {};
-    private var _getSelfName = function(text, separator, log){return text}
+    private function  _getSelfName(text, separator, log){return text}
     private var _defaultSettings = {
         idColumnName: "id",
         textColumnName: "__l9",
