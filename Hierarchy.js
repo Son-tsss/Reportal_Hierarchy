@@ -20,7 +20,7 @@ class Hierarchy{
         textColumnName: "__l9",
         relationshipColumnName: "parent",
         textSeparator: "|",
-        additionalColumns: [],
+        additionalColumns: []
     };
 
     function Hierarchy(globals, settings) {
