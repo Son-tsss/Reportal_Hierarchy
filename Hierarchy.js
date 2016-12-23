@@ -106,7 +106,7 @@ class Hierarchy{
      * @returns {Object}
      */
     private function _createFlatEntry(row) {
-    var name = GetSelfName(row[_settings.textColumnName], _settings.textSeparator, _globals.log);
+    var name = GetSelfName(row[_settings.textColumnName], _settings.textSeparator);
     var flatEntry = {
         id: row[_settings.idColumnName].toLowerCase(),
         text: row[_settings.textColumnName],
@@ -116,7 +116,7 @@ class Hierarchy{
     };
 
     for(var i=0; i<_settings.additionalColumns.length; i++){
-        flatEntry.additionalColumns[_settings.additionalColumns[i]] = row[_settings.additionalColumns[i] ? row[_settings.additionalColumns[i]] : null]
+        flatEntry.additionalColumns[_settings.additionalColumns[i]] = row[_settings.additionalColumns[i]] ? row[_settings.additionalColumns[i]] : null
     }
 
     return flatEntry;
