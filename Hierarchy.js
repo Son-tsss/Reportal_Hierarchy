@@ -15,13 +15,11 @@ class Hierarchy{
     private var _levels = [];
     private var _flat = [];
     private var _flatObject = {};
-    private function  _getSelfName(text, separator, log){return text}
     private var _defaultSettings = {
         idColumnName: "id",
         textColumnName: "__l9",
         relationshipColumnName: "parent",
         textSeparator: "|",
-        getSelfName: _getSelfName,
         additionalColumns: []
     };
 
@@ -95,7 +93,7 @@ class Hierarchy{
      * @returns {Object}
      */
     private function _createFlatEntry(row) {
-    var name = _settings.getSelfName(row[_settings.textColumnName], _settings.textSeparator, _globals.log);
+    var name = row[_settings.textColumnName];
     var flatEntry = {
         id: row[_settings.idColumnName].toLowerCase(),
         text: row[_settings.textColumnName],
