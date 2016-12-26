@@ -10,12 +10,11 @@
 class Hierarchy{
     private var _globals;
     private var _settings;
-  private var _table;
 
-    private var _hierarchy = [];
+    private var _hierarchy;
     private var _levels = [];
-    private var _flat = [];
-    private var _flatObject = {};
+  	private var _flat;
+    
     private var _defaultSettings = {
         idColumnName: "id",
         textColumnName: "__l9",
@@ -25,8 +24,9 @@ class Hierarchy{
     };
 
     function Hierarchy(globals, settings) {
-    _globals = globals;
-    _settings = _mergeOptions(_defaultSettings, settings);
+      _globals = globals;
+      _settings = _mixin(_defaultSettings, settings);
+      _flat = _generateFlatList(_getTable());
 	}
 
     /**
@@ -39,16 +39,12 @@ class Hierarchy{
      * @param {Object} obj2
      * @returns {Object}
      */
-    private function _mergeOptions(obj1, obj2) {
-    var obj3 = {};
-    for (var attrname in obj1) {
-        obj3[attrname] = obj1[attrname];
+    private function _mixin(to, from) {
+        for (var attr in from) {
+            to[attr] = from[attr];
+        }
+        return to;
     }
-    for (var attrname in obj2) {
-        obj3[attrname] = obj2[attrname];
-    }
-    return obj3;
-}
 
     /**
      * @memberof Hierarchy
@@ -69,26 +65,28 @@ class Hierarchy{
      * @instance
      * @function _generateFlatList
      * @description creating list of rows for variable _flat
-     * @param {Object[]} rows - list of rows from db table
+     * @param {Object} rows - list of rows from db table
      */
     private function _generateFlatList(table) {
       var rows = table.GetDataTable().Rows,
-          ac = _settings.additionalColumns;
-      var additionalColumns = _getAdditionalColumns(table,ac);
-          
- 
-      for(var i = 0; i < rows.Count; ++i) {
-          var flatEntry = _createFlatEntry(rows[i]);
-        if(ac.length>0){ //add additional columns
-          for(var c in additionalColumns){
-            var colval = additionalColumns[c][i];
-            if(colval && (colval).ToString().length>0)flatEntry[c] = colval;
+          ac = _settings.additionalColumns,
+      	  additionalColumns = _getAdditionalColumns(table,ac),
+          h={};
+           
+        for(var i = 0; i < rows.Count; ++i) {
+            var flatEntry = _createFlatEntry(rows[i]);
+          if(ac.length>0 && additionalColumns.length>0){ //add additional columns
+            for(var c in additionalColumns){
+              var colval = additionalColumns[c][i];
+              if(colval && (colval).ToString().length>0)flatEntry[c] = colval;
+            }
           }
-        }
-          _flat.push(flatEntry);
-      }
+          h[flatEntry.id]=flatEntry;
+      	}
+      return h
 	}
-      /**
+  
+    /**
      * @memberof Hierarchy
      * @private
      * @instance
@@ -131,13 +129,13 @@ class Hierarchy{
      * @returns {Object}
      */
     private function _createFlatEntry(row) {
-    var name = GetSelfName(row[_settings.textColumnName], _settings.textSeparator);
-     return {
-        id: row[_settings.idColumnName].toLowerCase(),
-        text: row[_settings.textColumnName],
-        name: name,
-        parent: row[_settings.relationshipColumnName] ? row[_settings.relationshipColumnName].toLowerCase() : null        
-    };
+      var name = GetSelfName(row[_settings.textColumnName], _settings.textSeparator);
+       return {
+          id: row[_settings.idColumnName].toLowerCase(),
+          text: row[_settings.textColumnName],
+          name: name,
+          parent: row[_settings.relationshipColumnName] ? row[_settings.relationshipColumnName].toLowerCase() : null        
+      };
 	}
 
     /**
@@ -148,8 +146,8 @@ class Hierarchy{
 	 * @returns {Array.<Object>}
      */
     function GetHierarchyArray() {
-      if(_hierarchy.length==0){_setupHierarchy(0, null);}
-    	return _hierarchy;
+      if(_hierarchy.length==0){_setupHierarchy();}
+      return _hierarchy;
 	}
   
 
@@ -163,13 +161,13 @@ class Hierarchy{
      * @returns {Object[]}
      */
     function GetLevelArray(level) {
-      if(_hierarchy.length==0){_setupHierarchy(0, null);}
-    if(_levels.length > level) {
-        return _levels[level];
-    }else{
-        throw new Error(201, "Hierarchy level index is out of range");
+        if(_levels.length==0){_setupHierarchyLevels(_hierarchy,0);}
+        if(_levels.length > level) {
+            return _levels[level];
+        }else{
+            throw new Error(201, "Hierarchy level index is out of range");
+        }
     }
-}
 
     /**
      * @memberof Hierarchy
@@ -179,19 +177,18 @@ class Hierarchy{
      * @returns {Number}
      */
     function GetLevelsCount() {
-      if(_hierarchy.length==0){_setupHierarchy(0, null);}
-    return _levels.length
-}
+      if(_levels.length==0){_setupHierarchyLevels(_hierarchy,0);}
+   	  return _levels.length
+	}
 
     /**
      * @memberof Hierarchy
      * @instance
-     * @function GetFlatArray
+     * @function GetFlatHierarchy
      * @description function to get Array of rows from db table
      * @returns {Number}
      */
-    function GetFlatArray() {
-      if(_flat.length==0){_generateFlatList(_getTable());}
+    function GetFlatHierarchy() {
     	return _flat;
 	}
 
@@ -204,13 +201,35 @@ class Hierarchy{
      * @returns {Object}
      */
     function GetObjectById(id) {
-      if(_hierarchy.length==0){_setupHierarchy(0, null);}
-    if(_flatObject[id]) {
-        return _flatObject[id];
-    }else{
-        throw new Error(201, "Hierarchy object id doesn't exist");
+      if(_flat[id]){
+        return _flat[id]
+      } else {
+        throw new Error(201, "Hierarchy object id doesn't exist")
+      }      
     }
-}
+  
+      /**
+     * @memberof Hierarchy
+     * @private
+     * @instance
+     * @function _setupHierarchy
+     * @description recursive function to parse db table to hierarchical view
+     * @param {Number} level
+     * @param {Number} parentObj
+     */
+    private function _setupHierarchyLevels(hierarchy,lvl) {
+      if(_hierarchy==undefined){_hierarchy = _setupHierarchy()}
+      if(hierarchy){
+        if(!_levels[lvl]){_levels[lvl] = []}
+        for(var i=0;i<hierarchy.length;i++){
+          _levels[lvl].push(hierarchy[i]);
+          if(hierarchy[i].subcells){
+            _setupHierarchyLevels(hierarchy[i].subcells, lvl+1)
+          }
+        }      	
+      }
+    }
+  
 
     /**
      * @memberof Hierarchy
@@ -222,32 +241,18 @@ class Hierarchy{
      * @param {Number} parentObj
      */
     private function _setupHierarchy( level, parentObj ) {
-      if(_flat.length==0){_generateFlatList(_getTable());}
-    var parentObjId = parentObj ? parentObj.id  : "";
-
-    for(var i = 0; i < _flat.length; ++i) {
-        if( ( !parentObj && !_flat[i].parent ) || parentObjId.CompareTo( _flat[i].parent ? _flat[i].parent : "" ) == 0) {
-            var newObj = {
-                id: _flat[i].id,
-                text: _flat[i].text,
-                name: _flat[i].name,
-                parent: parentObjId,
-                additionalColumns: _flat[i].additionalColumns,
-                subcells: []
-            };
-            if( _levels.length <= level ) {
-                _levels.push( [] );
-            }
-            _setupHierarchy( (level+1), newObj );
-            if( !parentObj ) {
-                _hierarchy.push( newObj );
-            }
-            else {
-                parentObj.subcells.push( newObj );
-            }
-            _levels[ level ].push( newObj );
-            _flatObject[ newObj.id ] = newObj;
+        var orphans = [];
+        for(var key in _flat){
+          var item = _flat[key];
+          // map item to parent
+          if(item.parent && item.parent!=null && item.parent.length>0){
+            var parent = _flat[item.parent];
+            parent.subcells = parent.subcells || [];
+            parent.subcells.push(item);
+          } else {
+            orphans.push(item);
+          }
         }
+        return orphans
     }
-}
 }
