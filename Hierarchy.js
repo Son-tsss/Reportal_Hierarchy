@@ -75,7 +75,7 @@ class Hierarchy{
            
         for(var i = 0; i < rows.Count; ++i) {
             var flatEntry = _createFlatEntry(rows[i]);
-          if(ac.length>0 && additionalColumns.length>0){ //add additional columns
+          if(ac.length>0 && additionalColumns){ //add additional columns
             for(var c in additionalColumns){
               var colval = additionalColumns[c][i];
               if(colval && (colval).ToString().length>0)flatEntry[c] = colval;
@@ -97,8 +97,9 @@ class Hierarchy{
      * @returns {Objecte} Returns an object with column name as key and String Collection as value
      */
   private function _getAdditionalColumns(table, ac){
-    var c={};
+    var c;
     if(ac.length>0){
+      c={};
       for(var i=0;i<ac.length;i++){
       	c[ac[i]] = table.GetColumnValues(_settings.textColumnName+ac[i]);
       }
